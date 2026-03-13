@@ -1,6 +1,8 @@
 package com.nqdung.paymenthub.service;
 
 import com.nqdung.paymenthub.dto.GroupCategoryDTO;
+import com.nqdung.paymenthub.dto.request.GroupCategoryCreateRequest;
+import com.nqdung.paymenthub.dto.request.GroupCategoryUpdateRequest;
 import com.nqdung.paymenthub.entity.GroupCategoryEntity;
 import com.nqdung.paymenthub.mapper.GroupCategoryMapper;
 import com.nqdung.paymenthub.repository.GroupCategoryRepository;
@@ -20,10 +22,7 @@ public class GroupCategoryService implements IGroupCategoryService {
 
     // Thêm tham số danh mục theo nhóm
     @Override
-    public GroupCategoryDTO addParamType(GroupCategoryDTO dto) {
-        if (categoryRepository.existsByParamType(dto.getParamType())) {
-            throw new RuntimeException("Danh mục theo nhóm đã tồn tại");
-        }
+    public GroupCategoryDTO addParamType(GroupCategoryCreateRequest dto) {
         GroupCategoryEntity entity = new GroupCategoryEntity();
         entity.setParamType(dto.getParamType());
         entity.setParamValue(dto.getParamValue());
@@ -53,7 +52,7 @@ public class GroupCategoryService implements IGroupCategoryService {
 
     @Transactional
     @Override
-    public GroupCategoryDTO editParam(Long id, GroupCategoryDTO newParam) {
+    public GroupCategoryDTO editParam(Long id, GroupCategoryUpdateRequest newParam) {
         GroupCategoryEntity param = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục"));
         param.setParamValue(newParam.getParamValue());
@@ -63,6 +62,16 @@ public class GroupCategoryService implements IGroupCategoryService {
         param.setEndEffectiveDate(newParam.getEndEffectiveDate());
         param.setDescription(newParam.getDescription());
         return categoryGroupMapper.toDTO(param);
+    }
+
+    @Override
+    public List<GroupCategoryEntity> findByParamCategory(String paramType, String paramValue,
+                                                         String paramName, String componentCode, Integer status) {
+        List<GroupCategoryEntity> categories = categoryRepository.findGroupCategoryByParamType(paramType, paramValue, paramName, componentCode, status);
+        if (categories.isEmpty()) {
+            throw new RuntimeException("Không có danh mục nào");
+        }
+        return categories;
     }
 
     @Override
