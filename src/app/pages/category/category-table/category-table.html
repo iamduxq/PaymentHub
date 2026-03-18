@@ -1,0 +1,77 @@
+<div class="bg-white rounded-lg shadow mx-4">
+    <div class="flex justify-between items-center p-4 border-b">
+        <div class="flex item-center gap-2">
+            <h2 class="font-semibold text-lg">Danh sách bản ghi</h2>
+            <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">{{ categories.length }}</span>
+        </div>
+        <button class="px-4 py-2 border rounded-lg text-sm">
+            Xuất Excel
+        </button>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="p-3 text-left"><input type="checkbox"></th>
+                    <th class="p-3 text-left text-sm">STT</th>
+                    <th class="p-3 text-left text-sm">Tên thành phần</th>
+                    <th class="p-3 text-left text-sm">Danh mục theo nhóm</th>
+                    <th class="p-3 text-left text-sm">Giá trị thành phần</th>
+                    <th class="p-3 text-left text-sm">Cấu phần xử lý</th>
+                    <th class="p-3 text-left text-sm">Ngày hiệu lực</th>
+                    <th class="p-3 text-left text-sm">Ngày hết hiệu lực</th>
+                    <th class="p-3 text-left text-sm">Trạng thái tham số</th>
+                    <th class="p-3 text-left text-sm">Hoạt động</th>
+                    <th class="p-3 text-left text-sm">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (item of categories; track item.id; let i = $index) {
+                <tr class="border-t hover:bg-gray-50">
+                    <td class="p-3 text-xs"><input type="checkbox"></td>
+                    <td class="p-3 text-xs">{{ i + 1 }}</td>
+                    <td class="p-3 text-xs">{{ item.paramName }}</td>
+                    <td class="p-3 text-xs">{{ item.paramType }}</td>
+                    <td class="p-3 text-xs">{{ item.paramValue }}</td>
+                    <td class="p-3 text-xs">{{ item.componentCode }}</td>
+                    <td class="p-3 text-xs">{{ item.effectiveDate | date: 'dd/MM/yyyy' }}</td>
+                    <td class="p-3 text-xs">{{ item.endEffectiveDate | date: 'dd/MM/yyyy' }}</td>
+                    <td class="p-3 text-xs">
+                        <span class="px-2 py-1 rounded text-xs font-medium inline-block"
+                            [ngClass]="statusMap[item.status]?.class">
+                            {{ statusMap[item.status]?.label }}
+                        </span>
+                    </td>
+                    <td class="p-3 text-xs">
+                        <span class="px-2 py-1 rounded text-xs font-medium whitespace-nowrap" [ngClass]="item.isActive === 1 
+      ? 'text-green-700 bg-green-50 border border-green-200' 
+      : 'text-gray-600 bg-gray-100 border border-gray-200'">
+                            {{ item.isActive === 1 ? 'Hoạt động' : 'Không hoạt động' }}
+                        </span>
+                    </td>
+                    <td class="p-3 text-xs">
+                        <div class="flex items-center gap-2">
+                            <button
+                                class="px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 hover:bg-gray-100 transition" (click)="gotoUpdatePage(item.id)">
+                                Sửa
+                            </button>
+
+                            <button
+                                class="px-3 py-1.5 text-xs font-medium rounded-md border border-red-300 text-red-600 hover:bg-red-50 transition"
+                                (click)="deleteCategory(item.id)">
+                                Xóa
+                            </button>
+
+                            <button
+                                class="px-3 py-1.5 text-xs font-medium rounded-md border border-green-300 text-green-600 hover:bg-green-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                [disabled]="item.status !== 3">
+                                Duyệt
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

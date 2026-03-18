@@ -1,0 +1,12 @@
+<nav class="text-sm mx-4">
+  <ol class="flex items-center space-x-2">
+    @for (item of breadcrumbs(); track item; let last = $last) {
+      <li [class.font-medium]="last" class="underline">
+        {{ item }}
+      </li>
+      @if (!last) {
+      <li>></li>
+      }
+    }
+  </ol>
+</nav>

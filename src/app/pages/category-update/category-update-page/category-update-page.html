@@ -1,0 +1,25 @@
+<div class="space-y-6">
+    <nav class="text-sm mb-2 mx-4">
+        <div class="flex justify-between items-end mb-4">
+            <h1 class="text-2xl font-semibold">
+                < Sửa tham số theo nhóm</h1>
+                    <div class="btn-action flex gap-3">
+                        <button
+                            class="btn-add px-5 py-3 text-black border border-gray-300 rounded-lg content-center font-medium hover:bg-gray-300"
+                            (click)="gotoCategoryPage()">
+                            X
+                        </button>
+                        <button
+                            class="btn-add px-6 py-3 text-teal-700 bg-white border border-teal-700 rounded-lg content-center font-medium hover:text-white hover:bg-teal-700">
+                            Lưu
+                        </button>
+                        <button class="btn-add px-6 py-3 bg-teal-700 text-white rounded-lg content-center font-medium hover:text-teal-700 hover:bg-white hover:border hover:border-teal-700" (click)="categoryUpdateForm.update()">
+                            Lưu và gửi duyệt
+                        </button>
+                    </div>
+        </div>
+    </nav>
+
+    <!-- form -->
+    <app-category-update-form #categoryUpdateForm></app-category-update-form>
+</div>

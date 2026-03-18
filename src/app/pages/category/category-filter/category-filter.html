@@ -1,0 +1,58 @@
+<div class="bg-white p-4 rounded-lg shadow mx-4 mb-4">
+  <div class="grid grid-cols-4 gap-4">
+
+    <div class="flex flex-col">
+      <span class="font-medium">Danh mục theo nhóm</span>
+      <input [(ngModel)]="filter.paramType" type="text" placeholder="Nhập nội dung"
+        class="border border-gray-400 rounded-lg py-2 px-3" />
+    </div>
+
+    <div class="flex flex-col">
+      <span class="font-medium">Giá trị thành phần</span>
+      <input [(ngModel)]="filter.paramValue" type="text" placeholder="Nhập nội dung"
+        class="border border-gray-400 rounded-lg py-2 px-3" />
+    </div>
+
+    <div class="flex flex-col">
+      <span class="font-medium">Tên thành phần</span>
+      <input [(ngModel)]="filter.paramName" type="text" placeholder="Nhập nội dung"
+        class="border border-gray-400 rounded-lg py-2 px-3" />
+    </div>
+
+    <div class="flex flex-col">
+      <span class="font-medium">Trạng thái tham số</span>
+      <select [(ngModel)]="selectedStatus" class="w-full border border-gray-400 rounded-lg py-2 px-3 bg-white
+           appearance-none focus:outline-none focus:ring-2 focus:ring-teal-600">
+        <option [ngValue]="null">Tất cả</option>
+        @for (item of statusOptions; track item.value) {
+        <option [ngValue]="item.value">{{ item.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="flex justify-between items-end mt-4 py-2">
+    <div class="flex flex-col w-64">
+      <span class="font-medium">Trạng thái hoạt động</span>
+      <select [(ngModel)]="selectedActive" class="w-full border border-gray-400 rounded-lg py-2 pl-3 pr-10 bg-white
+         appearance-none focus:outline-none focus:ring-2 focus:ring-teal-600">
+        <option [ngValue]="null">Tất cả</option>
+        @for (a of activeOptions; track a.value) {
+        <option [ngValue]="a.value">
+          {{ a.label }}
+        </option>
+        }
+      </select>
+    </div>
+
+    <!-- button -->
+    <div class="flex gap-2">
+      <button class="btn-reset px-4 py-2 border rounded-lg cursor-pointer" (click)="reset()">
+        Xóa bộ lọc
+      </button>
+      <button class="btn-search px-4 py-2 bg-teal-700 text-white rounded-lg cursor-pointer" (click)="onsearch()">
+        Tìm kiếm
+      </button>
+    </div>
+  </div>
+</div>

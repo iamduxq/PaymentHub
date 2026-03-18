@@ -1,0 +1,47 @@
+<div class="bg-white p-4 rounded-lg shadow mx-4 mb-4">
+  <div class="grid grid-cols-4 gap-4 mb-4">
+
+    <div class="flex flex-col">
+      <label class="block font-medium">Danh mục theo nhóm <span class="required text-red-600">*</span></label>
+      <input required [(ngModel)]="formData.paramType" type="text" placeholder="Nhập danh mục theo nhóm" class="border border-gray-400 rounded-lg py-2 px-3" />
+    </div>
+
+    <div class="flex flex-col">
+      <label class="block font-medium">Giá trị thành phần <span class="required text-red-600">*</span></label>
+      <input required [(ngModel)]="formData.paramValue" type="text" placeholder="Nhập giá trị thành phần" class="border border-gray-400 rounded-lg py-2 px-3" />
+    </div>
+
+    <div class="flex flex-col">
+      <label class="block font-medium">Tên thành phần <span class="required text-red-600">*</span></label>
+      <input required [(ngModel)]="formData.paramName" type="text" placeholder="Nhập tên thành phần" class="border border-gray-400 rounded-lg py-2 px-3" />
+    </div>
+
+    <div class="flex flex-col">
+      <label class="block font-medium">Cấu phần xử lý <span class="required text-red-600">*</span></label>
+      <select required [(ngModel)]="selectedComponent" class="w-full border border-gray-400 rounded-lg py-2 px-3 bg-white
+           appearance-none focus:outline-none focus:ring-2 focus:ring-teal-600">
+        <option value="" disabled selected>Chọn giá trị</option>
+        <option *ngFor="let c of components" [value]="c.componentCode">{{ c.componentCode }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4 mb-4">
+    <div class="flex flex-col">
+      <label class="block font-medium">Ngày hiệu lực <span class="required text-red-600">*</span></label>
+      <input required [(ngModel)]="formData.effectiveDate" type="date" placeholder="dd/mm/yyyy" class="border border-gray-400 rounded-lg py-2 px-3" />
+    </div>
+
+    <div class="flex flex-col">
+      <label class="block font-medium">Ngày hết hiệu lực</label>
+      <input [(ngModel)]="formData.endEffectiveDate" type="date" placeholder="dd/mm/yyyy" class="border border-gray-400 rounded-lg py-2 px-3" />
+    </div>
+  </div>
+
+  <div class="flex flex-col mb-2">
+    <label class="block font-medium">Mô tả</label>
+    <textarea [(ngModel)]="formData.description" rows="1" placeholder="Nhập nội dung"
+      class="border border-gray-400 rounded-lg py-2 px-3 resize-none overflow-hidden"
+      (input)="autoResize($event)"></textarea>
+  </div>
+</div>
