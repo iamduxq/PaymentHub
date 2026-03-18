@@ -1,14 +1,17 @@
-package com.nqdung.paymenthub.service;
+package com.nqdung.paymenthub.service.impl;
 
 import com.nqdung.paymenthub.dto.GroupCategoryDTO;
 import com.nqdung.paymenthub.dto.request.GroupCategoryCreateRequest;
+import com.nqdung.paymenthub.dto.request.GroupCategorySearchRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategoryUpdateRequest;
 import com.nqdung.paymenthub.entity.GroupCategoryEntity;
 import com.nqdung.paymenthub.mapper.GroupCategoryMapper;
 import com.nqdung.paymenthub.repository.GroupCategoryRepository;
-import com.nqdung.paymenthub.service.impl.IGroupCategoryService;
+import com.nqdung.paymenthub.repository.GroupCategorySpecification;
+import com.nqdung.paymenthub.service.IGroupCategoryService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,17 +42,21 @@ public class GroupCategoryService implements IGroupCategoryService {
         return categoryGroupMapper.toDTO(entity);
     }
 
+    // Lấy tất cả dữ liệu
     @Override
     public List<GroupCategoryEntity> getAll() {
         return categoryRepository.findAll();
     }
 
+
+    // Tìm record theo id
     @Override
     public GroupCategoryEntity findById(Long id) {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục"));
     }
 
+    // Sửa dữ liệu
     @Transactional
     @Override
     public GroupCategoryDTO editParam(Long id, GroupCategoryUpdateRequest newParam) {
@@ -64,20 +71,20 @@ public class GroupCategoryService implements IGroupCategoryService {
         return categoryGroupMapper.toDTO(param);
     }
 
-    @Override
-    public List<GroupCategoryEntity> findByParamCategory(String paramType, String paramValue,
-                                                         String paramName, String componentCode, Integer status) {
-        List<GroupCategoryEntity> categories = categoryRepository.findGroupCategoryByParamType(paramType, paramValue, paramName, componentCode, status);
-        if (categories.isEmpty()) {
-            throw new RuntimeException("Không có danh mục nào");
-        }
-        return categories;
-    }
 
+    // Xóa dữ liệu
     @Override
     public void delete(Long id) {
         GroupCategoryEntity category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy dữ liệu"));
         categoryRepository.delete(category);
+    }
+
+
+    // Tìm kiếm động
+    @Override
+    public List<GroupCategoryEntity> findCategoryWithCustomMatches(GroupCategorySearchRequest request) {
+        Specification<GroupCategoryEntity> spec = GroupCategorySpecification.filter(request);
+        return categoryRepository.findAll(spec);
     }
 }

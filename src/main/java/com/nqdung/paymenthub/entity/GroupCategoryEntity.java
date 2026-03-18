@@ -12,8 +12,9 @@ import java.util.Date;
 @Setter
 public class GroupCategoryEntity {
     @Id
+    @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID;
+    private Long id;
 
     @Column(name = "PARAM_NAME")
     private String paramName;
@@ -29,6 +30,10 @@ public class GroupCategoryEntity {
 
     @Column(name = "COMPONENT_CODE")
     private String componentCode;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "COMPONENT_CODE", referencedColumnName = "COMPONENT_CODE", insertable = false, updatable = false)
+    private ComponentsEntity component;
 
     @Column(name = "STATUS")
     private Integer status;

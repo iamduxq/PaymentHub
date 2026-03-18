@@ -59,13 +59,13 @@ public class GroupCategoryNativeQueryRepository {
         String sql = """
                 SELECT * FROM PMH_GROUP_CATEGORY
                 WHERE PARAM_TYPE = :paramType AND PARAM_VALUE = :paramValue AND PARAM_NAME = :paramName 
-                AND COMPONENT_CODE = :componentCode AND STATUS = :status
+                AND IS_ACTIVE = :isActive AND STATUS = :status
                 """;
         return entityManager.createNativeQuery(sql, GroupCategoryEntity.class)
                 .setParameter("paramType", request.getParamType())
                 .setParameter("paramValue", request.getParamValue())
                 .setParameter("paramName", request.getParamName())
-                .setParameter("componentCode", request.getComponentCode())
+                .setParameter("isActive", request.getIsActive())
                 .setParameter("status", request.getStatus())
                 .getResultList();
     }

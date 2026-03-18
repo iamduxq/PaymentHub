@@ -8,6 +8,7 @@ import java.util.Date;
 
 @Getter @Setter
 public class GroupCategoryUpdateRequest {
+    private Long id;
     private String paramType;
     private String paramValue;
     private String paramName;

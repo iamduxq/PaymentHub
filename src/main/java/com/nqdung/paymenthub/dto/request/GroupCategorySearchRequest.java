@@ -8,6 +8,6 @@ public class GroupCategorySearchRequest {
     private String paramType;
     private String paramValue;
     private String paramName;
-    private String componentCode;
     private Integer status;
+    private Integer isActive;
 }

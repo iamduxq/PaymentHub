@@ -11,7 +11,7 @@ public class GroupCategoryMapper {
     public GroupCategoryDTO toDTO(GroupCategoryEntity entity) {
         if (entity == null) return null;
         GroupCategoryDTO dto = new GroupCategoryDTO();
-        dto.setID(entity.getID());
+        dto.setId(entity.getId());
         dto.setParamType(entity.getParamType());
         dto.setParamValue(entity.getParamValue());
         dto.setParamName(entity.getParamName());

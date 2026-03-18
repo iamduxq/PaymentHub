@@ -5,7 +5,7 @@ import com.nqdung.paymenthub.dto.request.GroupCategoryCreateRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategorySearchRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategoryUpdateRequest;
 import com.nqdung.paymenthub.entity.GroupCategoryEntity;
-import com.nqdung.paymenthub.service.impl.IGroupCategoryService;
+import com.nqdung.paymenthub.service.IGroupCategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/category")
 @RequiredArgsConstructor
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin("http://localhost:4200")
 public class GroupCategoryController {
 
     private final IGroupCategoryService groupCategoryService;
@@ -39,12 +39,10 @@ public class GroupCategoryController {
         return groupCategoryService.findById(id);
     }
 
-    // Tìm danh mục theo nhóm
+    // Tìm kiếm danh mục theo nhóm
     @PostMapping("/search")
-    public ResponseEntity<List<GroupCategoryEntity>> findGroupCategoryByParamType(@RequestBody GroupCategorySearchRequest categoryRequest) {
-        List<GroupCategoryEntity> result = groupCategoryService.findByParamCategory(categoryRequest.getParamType(), categoryRequest.getParamValue(),
-                categoryRequest.getParamName(), categoryRequest.getComponentCode(), categoryRequest.getStatus());
-        return ResponseEntity.ok(result);
+    public ResponseEntity<List<GroupCategoryEntity>> search(@RequestBody GroupCategorySearchRequest request) {
+        return ResponseEntity.ok(groupCategoryService.findCategoryWithCustomMatches(request));
     }
 
     // Sửa danh mục theo id
@@ -54,13 +52,9 @@ public class GroupCategoryController {
     }
 
     // Xóa danh mục theo id
-    @DeleteMapping("delete/{id}")
-    public ResponseEntity<GroupCategoryEntity> delete(@PathVariable Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
         groupCategoryService.delete(id);
         return ResponseEntity.ok().build();
     }
-
-
-    // Native Query
-
 }

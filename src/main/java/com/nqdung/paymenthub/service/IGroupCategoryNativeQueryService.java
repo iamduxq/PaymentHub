@@ -1,4 +1,4 @@
-package com.nqdung.paymenthub.service.impl;
+package com.nqdung.paymenthub.service;
 
 import com.nqdung.paymenthub.dto.request.GroupCategoryCreateRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategoryUpdateRequest;

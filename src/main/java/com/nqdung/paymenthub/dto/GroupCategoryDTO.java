@@ -9,7 +9,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class GroupCategoryDTO {
-    private Long ID;
+    private Long id;
     private String paramName;
     private String paramValue;
     private String paramType;

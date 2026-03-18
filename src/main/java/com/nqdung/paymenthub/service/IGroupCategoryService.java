@@ -1,7 +1,8 @@
-package com.nqdung.paymenthub.service.impl;
+package com.nqdung.paymenthub.service;
 
 import com.nqdung.paymenthub.dto.GroupCategoryDTO;
 import com.nqdung.paymenthub.dto.request.GroupCategoryCreateRequest;
+import com.nqdung.paymenthub.dto.request.GroupCategorySearchRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategoryUpdateRequest;
 import com.nqdung.paymenthub.entity.GroupCategoryEntity;
 
@@ -12,6 +13,6 @@ public interface IGroupCategoryService {
     List<GroupCategoryEntity> getAll();
     GroupCategoryEntity findById(Long id);
     GroupCategoryDTO editParam(Long id, GroupCategoryUpdateRequest newParam);
-    List<GroupCategoryEntity> findByParamCategory(String paramType, String paramValue, String paramName, String componentCode, Integer status);
     void delete(Long id);
+    List<GroupCategoryEntity> findCategoryWithCustomMatches(GroupCategorySearchRequest request);
 }

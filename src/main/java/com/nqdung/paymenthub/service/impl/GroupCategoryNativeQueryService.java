@@ -1,10 +1,10 @@
-package com.nqdung.paymenthub.service;
+package com.nqdung.paymenthub.service.impl;
 
 import com.nqdung.paymenthub.dto.request.GroupCategoryCreateRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategoryUpdateRequest;
 import com.nqdung.paymenthub.entity.GroupCategoryEntity;
 import com.nqdung.paymenthub.repository.GroupCategoryNativeQueryRepository;
-import com.nqdung.paymenthub.service.impl.IGroupCategoryNativeQueryService;
+import com.nqdung.paymenthub.service.IGroupCategoryNativeQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
