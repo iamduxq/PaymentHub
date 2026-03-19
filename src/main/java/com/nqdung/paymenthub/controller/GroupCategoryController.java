@@ -5,8 +5,10 @@ import com.nqdung.paymenthub.dto.request.GroupCategoryCreateRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategorySearchRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategoryUpdateRequest;
 import com.nqdung.paymenthub.entity.GroupCategoryEntity;
+import com.nqdung.paymenthub.mapper.GroupCategoryMapper;
 import com.nqdung.paymenthub.service.IGroupCategoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +21,7 @@ import java.util.List;
 public class GroupCategoryController {
 
     private final IGroupCategoryService groupCategoryService;
+    private final GroupCategoryMapper mapper;
 
     // JPA Query
     // Thêm danh mục tham số
@@ -29,8 +32,14 @@ public class GroupCategoryController {
 
     // Lấy tất cả danh mục
     @GetMapping
-    public List<GroupCategoryEntity> getAll() {
-        return groupCategoryService.getAll();
+    public Page<GroupCategoryDTO> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "effectiveDate") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending
+    ) {
+        Page<GroupCategoryEntity> entities = groupCategoryService.getAll(page, size, sortBy, ascending);
+        return entities.map(mapper::toDTO);
     }
 
     // Tìm danh mục theo id

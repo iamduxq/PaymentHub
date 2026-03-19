@@ -6,11 +6,13 @@ import com.nqdung.paymenthub.dto.request.GroupCategorySearchRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategoryUpdateRequest;
 import com.nqdung.paymenthub.entity.GroupCategoryEntity;
 import com.nqdung.paymenthub.mapper.GroupCategoryMapper;
+import com.nqdung.paymenthub.paging.PagingService;
 import com.nqdung.paymenthub.repository.GroupCategoryRepository;
 import com.nqdung.paymenthub.repository.GroupCategorySpecification;
 import com.nqdung.paymenthub.service.IGroupCategoryService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,7 @@ public class GroupCategoryService implements IGroupCategoryService {
 
     private final GroupCategoryRepository categoryRepository;
     private final GroupCategoryMapper categoryGroupMapper;
+    private final PagingService paging;
 
     // Thêm tham số danh mục theo nhóm
     @Override
@@ -44,8 +47,8 @@ public class GroupCategoryService implements IGroupCategoryService {
 
     // Lấy tất cả dữ liệu
     @Override
-    public List<GroupCategoryEntity> getAll() {
-        return categoryRepository.findAll();
+    public Page<GroupCategoryEntity> getAll(int page, int size, String sortBy, boolean ascending) {
+        return paging.getPage(categoryRepository, page, size, sortBy, ascending);
     }
 
 
