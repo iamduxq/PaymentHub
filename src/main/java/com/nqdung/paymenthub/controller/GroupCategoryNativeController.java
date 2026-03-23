@@ -1,8 +1,11 @@
 package com.nqdung.paymenthub.controller;
 
+import com.nqdung.paymenthub.dto.GroupCategoryDTO;
 import com.nqdung.paymenthub.dto.request.GroupCategoryCreateRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategoryUpdateRequest;
 import com.nqdung.paymenthub.entity.GroupCategoryEntity;
+import com.nqdung.paymenthub.mapper.GroupCategoryMapper;
+import com.nqdung.paymenthub.paging.PageResponse;
 import com.nqdung.paymenthub.service.IGroupCategoryNativeQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,14 +14,25 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/native/category")
+    @RequestMapping("/api/native/category")
 @RequiredArgsConstructor
 public class GroupCategoryNativeController {
     private final IGroupCategoryNativeQueryService nativeQuery;
+    private final GroupCategoryMapper mapper;
 
     @GetMapping
     public List<GroupCategoryEntity> findAll() {
         return nativeQuery.findAll();
+    }
+
+    @GetMapping("/getAll")
+    public PageResponse<GroupCategoryDTO> getAllWithPaging(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "true") boolean asc
+    ) {
+        return nativeQuery.getAllWithPaging(page, size, sortBy, asc);
     }
 
     @GetMapping("/search/{id}")

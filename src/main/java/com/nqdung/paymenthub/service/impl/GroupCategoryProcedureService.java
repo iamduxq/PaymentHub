@@ -9,6 +9,7 @@ import com.nqdung.paymenthub.mapper.GroupCategoryMapper;
 import com.nqdung.paymenthub.repository.GroupCategoryProcedureRepository;
 import com.nqdung.paymenthub.service.IGroupCategoryProcedureService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -61,5 +62,10 @@ public class GroupCategoryProcedureService implements IGroupCategoryProcedureSer
         if (entity != null) {
             procedure.delete(entity.getId());
         }
+    }
+
+    @Override
+    public Page<GroupCategoryEntity> getAllWithPaging(int page, int size) {
+        return procedure.getAllWithPaging(page, size);
     }
 }

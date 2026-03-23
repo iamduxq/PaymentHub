@@ -7,9 +7,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class PagingService {
-    public <T>Page<T> getPage(JpaRepository<T, ?> repository, int page, int size, String sortBy, boolean ascending) {
+    public <T>Page<T> getPage(JpaRepository<T, ?> repository, int page, int size, String sortBy, boolean ascending, List<String> allowedSortBy) {
+        // Kiểm tra allowedSortBy chứa sortBy
+        if (!allowedSortBy.contains(sortBy)) sortBy = allowedSortBy.get(0);
         Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
         return repository.findAll(pageable);

@@ -44,7 +44,7 @@ public class GroupCategoryEntity {
     @Column(name = "IS_DISPLAY")
     private Integer isDisplay;
 
-    @Column(name = "NEW_DATA")
+    @Column(name = "NEW_DATA", length = 4000)
     private String newData;
 
     @Column(name = "EFFECTIVE_DATE")

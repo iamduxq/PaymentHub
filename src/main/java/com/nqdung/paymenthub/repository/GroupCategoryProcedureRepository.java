@@ -9,6 +9,10 @@ import jakarta.persistence.ParameterMode;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.StoredProcedureQuery;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +54,22 @@ public class GroupCategoryProcedureRepository {
         StoredProcedureQuery query = entityManager.createStoredProcedureQuery("NQD_PRC_GROUPCATEGORY_GETALL", GroupCategoryEntity.class);
         query.registerStoredProcedureParameter("P_RESULT", void.class, ParameterMode.REF_CURSOR);
         return query.getResultList();
+    }
+
+    // Lấy tất cả dữ liệu với paging
+    public Page<GroupCategoryEntity> getAllWithPaging(int page, int size) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("NQD_PRC_GROUP_CATEGORY_GETALL_WITH_PAGING", GroupCategoryEntity.class);
+        query.registerStoredProcedureParameter("D_PAGE", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_SIZE", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_CURSOR", void.class, ParameterMode.REF_CURSOR);
+        query.registerStoredProcedureParameter("D_TOTAL", Integer.class, ParameterMode.OUT);
+        query.setParameter("D_PAGE", page);
+        query.setParameter("D_SIZE", size);
+        List<GroupCategoryEntity> result = query.getResultList();
+        Number totalNumber = (Number) query.getOutputParameterValue("D_TOTAL");
+        long total = totalNumber.longValue();
+        Pageable pageable = PageRequest.of(page, size);
+        return new PageImpl<>(result, pageable, total);
     }
 
     // Tìm kiếm theo tiêu chí

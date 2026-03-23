@@ -1,12 +1,14 @@
 package com.nqdung.paymenthub.repository;
 
-import com.nqdung.paymenthub.dto.GroupCategoryDTO;
 import com.nqdung.paymenthub.dto.request.GroupCategoryCreateRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategorySearchRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategoryUpdateRequest;
 import com.nqdung.paymenthub.entity.GroupCategoryEntity;
+import com.nqdung.paymenthub.paging.PageResponse;
+import com.nqdung.paymenthub.paging.PagingNativeService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +16,11 @@ import java.util.List;
 
 @Repository
 @Transactional
+@RequiredArgsConstructor
 public class GroupCategoryNativeQueryRepository {
+
+    private final PagingNativeService pagingService;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -22,6 +28,21 @@ public class GroupCategoryNativeQueryRepository {
     public List<GroupCategoryEntity> findAll() {
         String sql = "SELECT * FROM PMH_GROUP_CATEGORY";
         return entityManager.createNativeQuery(sql, GroupCategoryEntity.class).getResultList();
+    }
+
+    // Lấy dữ liệu có phân trang
+    public PageResponse<GroupCategoryEntity> getAllWithPaging(int page, int size, String sortBy, boolean asc) {
+        String baseSql = "SELECT * FROM PMH_GROUP_CATEGORY";
+        String countSql = "SELECT COUNT(*) FROM PMH_GROUP_CATEGORY";
+        return pagingService.paging(
+                baseSql,
+                countSql,
+                page,
+                size,
+                sortBy,
+                asc,
+                GroupCategoryEntity.class
+        );
     }
 
     // Tìm theo danh mục id
