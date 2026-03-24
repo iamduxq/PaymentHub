@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-    @RequestMapping("/api/native/category")
+@RequestMapping("/api/native/category")
 @RequiredArgsConstructor
 public class GroupCategoryNativeController {
     private final IGroupCategoryNativeQueryService nativeQuery;
@@ -30,9 +30,9 @@ public class GroupCategoryNativeController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String sortBy,
-            @RequestParam(defaultValue = "true") boolean asc
+            @RequestParam(defaultValue = "desc") String sortOrder
     ) {
-        return nativeQuery.getAllWithPaging(page, size, sortBy, asc);
+        return nativeQuery.getAllWithPaging(page, size, sortBy, sortOrder);
     }
 
     @GetMapping("/search/{id}")

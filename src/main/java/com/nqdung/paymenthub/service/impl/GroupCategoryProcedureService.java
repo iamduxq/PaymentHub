@@ -65,7 +65,7 @@ public class GroupCategoryProcedureService implements IGroupCategoryProcedureSer
     }
 
     @Override
-    public Page<GroupCategoryEntity> getAllWithPaging(int page, int size) {
-        return procedure.getAllWithPaging(page, size);
+    public Page<GroupCategoryEntity> getAllWithPaging(int page, int size, String sortBy, String sortOrder) {
+        return procedure.getAllWithPaging(page, size, sortBy, sortOrder);
     }
 }

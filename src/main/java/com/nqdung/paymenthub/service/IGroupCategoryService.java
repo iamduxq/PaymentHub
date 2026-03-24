@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface IGroupCategoryService {
     GroupCategoryDTO addParamType(GroupCategoryCreateRequest groupCategoryDTO);
-    Page<GroupCategoryEntity> getAllWithPaging(int page, int size, String sortBy, boolean ascending);
+    Page<GroupCategoryEntity> getAllWithPaging(int page, int size, String sortBy, String sortOrder);
     GroupCategoryEntity findById(Long id);
     GroupCategoryDTO editParam(Long id, GroupCategoryUpdateRequest newParam);
     void delete(Long id);

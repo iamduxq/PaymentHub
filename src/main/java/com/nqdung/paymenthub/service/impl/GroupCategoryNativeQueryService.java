@@ -26,10 +26,10 @@ public class GroupCategoryNativeQueryService implements IGroupCategoryNativeQuer
     }
 
     @Override
-    public PageResponse<GroupCategoryDTO> getAllWithPaging(int page, int size, String sortBy, boolean asc) {
-        PageResponse<GroupCategoryEntity> pageEntity = nativeQuery.getAllWithPaging(page, size, sortBy, asc);
+    public PageResponse<GroupCategoryDTO> getAllWithPaging(int page, int size, String sortBy, String sortOrder) {
+        PageResponse<GroupCategoryEntity> pageEntity = nativeQuery.getAllWithPaging(page, size, sortBy, sortOrder);
         List<GroupCategoryDTO> dtos = mapper.toDTOList(pageEntity.getData());
-        return new PageResponse<>(dtos, pageEntity.getTotal(), pageEntity.getPage(), pageEntity.getSize(), sortBy, asc);
+        return new PageResponse<>(dtos, pageEntity.getTotal(), pageEntity.getPage(), pageEntity.getSize(), sortBy, sortOrder);
     }
 
 

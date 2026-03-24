@@ -16,5 +16,5 @@ public interface IGroupCategoryProcedureService {
     GroupCategoryDTO update(GroupCategoryUpdateRequest request); // Sửa dữ liệu
     GroupCategoryDTO findById(Long id); // Tìm theo id
     void delete(Long id); // Xóa dữ liệu
-    Page<GroupCategoryEntity> getAllWithPaging(int page, int size); // Lấy tất cả dữ liệu với paging
+    Page<GroupCategoryEntity> getAllWithPaging(int page, int size, String sortBy, String sortOrder); // Lấy tất cả dữ liệu với paging
 }

@@ -1,12 +1,15 @@
 package com.nqdung.paymenthub.paging;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Getter @Setter
+@Getter
+@Setter
 @Builder
-public class PageResponse<T> {
+public class PageResponseProcedure<T> {
     private List<T> data;
     private long total;
     private int page;
@@ -14,7 +17,7 @@ public class PageResponse<T> {
     private String sortBy;
     private String sortOrder;
 
-    public PageResponse(List<T> data, long total, int page, int size, String sortBy, String sortOrder) {
+    public PageResponseProcedure(List<T> data, long total, int page, int size, String sortBy, String sortOrder) {
         this.data = data;
         this.total = total;
         this.page = page;

@@ -5,6 +5,8 @@ import com.nqdung.paymenthub.dto.request.GroupCategoryCreateRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategorySearchRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategoryUpdateRequest;
 import com.nqdung.paymenthub.mapper.GroupCategoryMapper;
+import com.nqdung.paymenthub.paging.PageMapper;
+import com.nqdung.paymenthub.paging.PageResponseProcedure;
 import com.nqdung.paymenthub.service.IGroupCategoryProcedureService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,11 +28,14 @@ public class GroupCategoryProcedureController {
     }
 
     @GetMapping("/get-all")
-    public Page<GroupCategoryDTO> getAllWithPaging(
+    public PageResponseProcedure<GroupCategoryDTO> getAllWithPaging(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "EFFECTIVE_DATE") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortOrder
     ) {
-        return service.getAllWithPaging(page, size).map(mapper::toDTO);
+        Page<GroupCategoryDTO> result = service.getAllWithPaging(page, size, sortBy, sortOrder).map(mapper::toDTO);
+        return PageMapper.toResponseProcedure(result, sortBy, sortOrder);
     }
 
     @PostMapping("/add")

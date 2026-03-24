@@ -31,7 +31,7 @@ public class GroupCategoryNativeQueryRepository {
     }
 
     // Lấy dữ liệu có phân trang
-    public PageResponse<GroupCategoryEntity> getAllWithPaging(int page, int size, String sortBy, boolean asc) {
+    public PageResponse<GroupCategoryEntity> getAllWithPaging(int page, int size, String sortBy, String sortOrder) {
         String baseSql = "SELECT * FROM PMH_GROUP_CATEGORY";
         String countSql = "SELECT COUNT(*) FROM PMH_GROUP_CATEGORY";
         return pagingService.paging(
@@ -40,7 +40,7 @@ public class GroupCategoryNativeQueryRepository {
                 page,
                 size,
                 sortBy,
-                asc,
+                sortOrder,
                 GroupCategoryEntity.class
         );
     }

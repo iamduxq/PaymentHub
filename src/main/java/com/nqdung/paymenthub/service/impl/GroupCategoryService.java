@@ -1,5 +1,7 @@
 package com.nqdung.paymenthub.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nqdung.paymenthub.constant.CategoryConstants;
 import com.nqdung.paymenthub.dto.GroupCategoryDTO;
 import com.nqdung.paymenthub.dto.request.GroupCategoryCreateRequest;
@@ -14,11 +16,9 @@ import com.nqdung.paymenthub.repository.GroupCategorySpecification;
 import com.nqdung.paymenthub.service.IGroupCategoryService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.json.JsonParseException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -30,28 +30,17 @@ public class GroupCategoryService implements IGroupCategoryService {
     private final GroupCategoryMapper categoryGroupMapper;
     private final ObjectMapper objectMapper;
     private final PagingService paging;
+    private static final List<String> ALLOWED_SORT = List.of("effectiveDate");
+
 
     // Thêm tham số danh mục theo nhóm
     @Override
     public GroupCategoryDTO addParamType(GroupCategoryCreateRequest dto) {
         GroupCategoryEntity entity = new GroupCategoryEntity();
 
-        try {
-            String json = objectMapper.writeValueAsString(dto);
-            entity.setNewData(json);
-        } catch (JsonParseException exception) {
-            throw new RuntimeException("Lỗi mapping NEW_DATA");
-        }
+        setNewData(entity, dto);
 
-        // Workflow mâu thuẫn test sau
-//        entity.setParamType(dto.getParamType());
-//        entity.setParamValue(dto.getParamValue());
-//        entity.setParamName(dto.getParamName());
-//        entity.setComponentCode(dto.getComponentCode());
-//        entity.setEffectiveDate(dto.getEffectiveDate());
-//        entity.setEndEffectiveDate(dto.getEndEffectiveDate());
-//        entity.setDescription(dto.getDescription());
-//        entity.setStatus(CategoryConstants.STATUS_NEW);
+        entity.setStatus(CategoryConstants.STATUS_NEW);
         entity.setIsActive(1);
         entity.setIsDisplay(CategoryConstants.DISPLAY_ALLOW_DELETE);
 
@@ -61,8 +50,8 @@ public class GroupCategoryService implements IGroupCategoryService {
 
     // Lấy tất cả dữ liệu
     @Override
-    public Page<GroupCategoryEntity> getAllWithPaging(int page, int size, String sortBy, boolean ascending) {
-        return paging.getPage(categoryRepository, page, size, sortBy, ascending, List.of("effectiveDate"));
+    public Page<GroupCategoryEntity> getAllWithPaging(int page, int size, String sortBy, String sortOrder) {
+        return paging.getPage(categoryRepository, page, size, sortBy, sortOrder, ALLOWED_SORT);
     }
 
 
@@ -80,26 +69,11 @@ public class GroupCategoryService implements IGroupCategoryService {
         GroupCategoryEntity entity = findCategory(id);
 
         // Kiểm tra xác thực chỉnh sửa
-        if (entity.getStatus() == CategoryConstants.STATUS_PENDING) {
-            throw new RuntimeException("Trạng thái đang chờ duyệt, không thể chỉnh sửa");
-        }
+        validateEditable(entity);
 
         // setNewData từ objectMapper
-        try {
-            String json = objectMapper.writeValueAsString(newParam);
-            entity.setNewData(json);
-            entity.setStatus(CategoryConstants.STATUS_NEW);
-            categoryRepository.save(entity);
-        } catch (JsonParseException exception) {
-            throw new RuntimeException("Lỗi đóng gói dữ liệu");
-        }
-
-//        param.setParamValue(newParam.getParamValue());
-//        param.setParamName(newParam.getParamName());
-//        param.setComponentCode(newParam.getComponentCode());
-//        param.setEffectiveDate(newParam.getEffectiveDate());
-//        param.setEndEffectiveDate(newParam.getEndEffectiveDate());
-//        param.setDescription(newParam.getDescription());
+        setNewData(entity, newParam);
+        entity.setStatus(CategoryConstants.STATUS_NEW);
         return categoryGroupMapper.toDTO(entity);
     }
 
@@ -127,22 +101,14 @@ public class GroupCategoryService implements IGroupCategoryService {
         GroupCategoryEntity entity = findCategory(id);
 
         // Kiểm tra xác thực phê duyệt
-        int currStatus = entity.getStatus();
-        if (currStatus != CategoryConstants.STATUS_NEW
-                && currStatus != CategoryConstants.STATUS_REJECTED
-                && currStatus != CategoryConstants.STATUS_CANCELLED) {
-            throw new RuntimeException("Trạng thái không hợp lệ để gửi phê duyệt");
-        }
+        validateSendApprove(entity);
 
         // Kiểm tra tồn tại
         validateDuplicate(entity, id);
 
-        try {
-            String newDataJS = objectMapper.writeValueAsString(request);
-            entity.setNewData(newDataJS);
-        } catch (JsonParseException exception) {
-            throw new RuntimeException("Lỗi chuyển đổi dữ lieute NEW_DATA", exception);
-        }
+        // setNewData từ objectMapper
+        setNewData(entity, request);
+
         entity.setStatus(CategoryConstants.STATUS_PENDING);
         categoryRepository.save(entity);
     }
@@ -152,24 +118,23 @@ public class GroupCategoryService implements IGroupCategoryService {
     public void approve(Long id) {
         GroupCategoryEntity entity = findCategory(id);
 
-        if (entity.getStatus() != CategoryConstants.STATUS_PENDING) {
-            throw new RuntimeException("Chỉ có thể phê duyệt ở trạng thái Chờ duyệt");
-        }
+        // Kiểm tra xác thực chờ duyệt
+        validatePending(entity);
 
         String newDataJson = entity.getNewData();
         if (newDataJson == null || newDataJson.isEmpty()) {
             throw new RuntimeException("Không tìm thấy newData để phê duyệt");
         }
 
-        try {
-            GroupCategoryRequest newData = objectMapper.readValue(newDataJson, GroupCategoryRequest.class);
+        // Đọc dữ liệu từ NewData
+        GroupCategoryRequest newData = readNewData(entity, GroupCategoryRequest.class);
 
-            // Setter NEW_DATA
-            applyApprovedData(entity, newData);
-            categoryRepository.save(entity);
-        } catch (JsonParseException e) {
-            throw new RuntimeException("Lỗi khi phê duyệt NEW_DATA", e);
-        }
+        applyApprovedData(entity, newData);
+        // Setter NEW_DATA
+        applyApprovedData(entity, newData);
+        entity.setStatus(CategoryConstants.STATUS_APPROVED);
+        entity.setIsDisplay(CategoryConstants.DISPLAY_NO_DELETE);
+        categoryRepository.save(entity);
     }
 
     @Override
@@ -190,10 +155,19 @@ public class GroupCategoryService implements IGroupCategoryService {
         return findById(id);
     }
 
+    private void setNewData(GroupCategoryEntity entity, Object newData) {
+        try {
+            entity.setNewData(objectMapper.writeValueAsString(newData));
+        } catch (JsonProcessingException exception) {
+            throw new RuntimeException("Lỗi mapping NEW_DATA");
+        }
+    }
+
+    // Đọc dữ liệu từ NewData
     private <T> T readNewData(GroupCategoryEntity entity, Class<T> tClass) {
         try {
             return objectMapper.readValue(entity.getNewData(), tClass);
-        } catch (JsonParseException exception) {
+        } catch (JsonProcessingException exception) {
             throw new RuntimeException("Không thể đọc NEW_DATA", exception);
         }
     }
@@ -210,8 +184,8 @@ public class GroupCategoryService implements IGroupCategoryService {
     private void validateSendApprove(GroupCategoryEntity entity) {
         int status = entity.getStatus();
         if (status != CategoryConstants.STATUS_NEW
-        && status != CategoryConstants.STATUS_REJECTED
-        && status != CategoryConstants.STATUS_CANCELLED) {
+                && status != CategoryConstants.STATUS_REJECTED
+                && status != CategoryConstants.STATUS_CANCELLED) {
             throw new RuntimeException("Trạng thái không hợp lệ để gửi duyệt");
         }
     }

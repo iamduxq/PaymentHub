@@ -9,10 +9,7 @@ import jakarta.persistence.ParameterMode;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.StoredProcedureQuery;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,18 +54,22 @@ public class GroupCategoryProcedureRepository {
     }
 
     // Lấy tất cả dữ liệu với paging
-    public Page<GroupCategoryEntity> getAllWithPaging(int page, int size) {
+    public Page<GroupCategoryEntity> getAllWithPaging(int page, int size, String sortBy, String order) {
         StoredProcedureQuery query = entityManager.createStoredProcedureQuery("NQD_PRC_GROUP_CATEGORY_GETALL_WITH_PAGING", GroupCategoryEntity.class);
         query.registerStoredProcedureParameter("D_PAGE", Integer.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("D_SIZE", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_SORT_BY", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_ORDER", String.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("D_CURSOR", void.class, ParameterMode.REF_CURSOR);
         query.registerStoredProcedureParameter("D_TOTAL", Integer.class, ParameterMode.OUT);
         query.setParameter("D_PAGE", page);
         query.setParameter("D_SIZE", size);
+        query.setParameter("D_SORT_BY", sortBy);
+        query.setParameter("D_ORDER", order);
         List<GroupCategoryEntity> result = query.getResultList();
         Number totalNumber = (Number) query.getOutputParameterValue("D_TOTAL");
-        long total = totalNumber.longValue();
-        Pageable pageable = PageRequest.of(page, size);
+        long total = (totalNumber != null) ? totalNumber.longValue() : 0L;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(order), sortBy));
         return new PageImpl<>(result, pageable, total);
     }
 

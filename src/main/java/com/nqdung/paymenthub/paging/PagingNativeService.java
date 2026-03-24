@@ -5,6 +5,7 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class PagingNativeService {
@@ -18,13 +19,13 @@ public class PagingNativeService {
             int page,
             int size,
             String sortBy,
-            boolean asc,
+            String sortOrder,
             Class<T> tClass
     ) {
         int offset = page * size;
         String order = "";
         if (sortBy != null && !sortBy.isEmpty()) {
-            order = " ORDER BY " + sortBy + (asc ? " ASC" : " DESC");
+            order = " ORDER BY " + sortBy + (Objects.equals(sortOrder, "DESC") ? " DESC" : " ASC");
         }
 
         String sql = baseUrl + order;
@@ -34,7 +35,7 @@ public class PagingNativeService {
                 .getResultList();
 
         long total = ((Number) entityManager.createNativeQuery(countSql).getSingleResult()).longValue();
-        return new PageResponse<>(data, total, page, size, sortBy, asc);
+        return new PageResponse<>(data, total, page, size, sortBy, sortOrder);
     }
 
 
