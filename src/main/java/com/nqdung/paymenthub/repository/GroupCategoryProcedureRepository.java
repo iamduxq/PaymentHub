@@ -92,6 +92,68 @@ public class GroupCategoryProcedureRepository {
         return query.getResultList();
     }
 
+    // Dynamic search
+    @SuppressWarnings("unchecked")
+    public Page<GroupCategoryEntity> searchDynamic1(GroupCategorySearchRequest request) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("NQD_PRC_GROUP_CATEGORY_SEARCH_PAGING2", GroupCategoryEntity.class);
+        query.registerStoredProcedureParameter("P_PARAM_NAME", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("P_PARAM_TYPE", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("P_PARAM_VALUE", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("P_STATUS", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("P_IS_ACTIVE", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("P_PAGE", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("P_SIZE", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("P_SORT_BY", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("P_SORT_ORDER", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("P_TOTAL_ROWS", Long.class, ParameterMode.OUT);
+        query.registerStoredProcedureParameter("P_CURSOR", void.class, ParameterMode.REF_CURSOR);
+
+        query.setParameter("P_PARAM_NAME", request.getParamName());
+        query.setParameter("P_PARAM_TYPE", request.getParamType());
+        query.setParameter("P_PARAM_VALUE", request.getParamValue());
+        query.setParameter("P_STATUS", request.getStatus());
+        query.setParameter("P_IS_ACTIVE", request.getIsActive());
+        query.setParameter("P_PAGE", request.getPage() + 1);
+        query.setParameter("P_SIZE", request.getSize());
+        query.setParameter("P_SORT_BY", request.getSortBy());
+        query.setParameter("P_SORT_ORDER", request.getSortOrder());
+
+        Long total = (Long) query.getOutputParameterValue("P_TOTAL_ROWS");
+        List<GroupCategoryEntity> data = query.getResultList();
+
+        return new PageImpl<>(data, PageRequest.of(request.getPage(), request.getSize()), total);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Page<GroupCategoryEntity> searchDynamic4(GroupCategorySearchRequest request) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("NQD_PRC_GROUP_CATEGORY_SEARCH_PAGING_DBMS_SQL", GroupCategoryEntity.class);
+        query.registerStoredProcedureParameter("p_param_name", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_param_type", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_param_value", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_status", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_is_active", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_page", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_size", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_sort_by", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_sort_order", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_total_rows", Long.class, ParameterMode.OUT);
+        query.registerStoredProcedureParameter("p_cursor", void.class, ParameterMode.REF_CURSOR);
+
+        query.setParameter("p_param_name", request.getParamName());
+        query.setParameter("p_param_type", request.getParamType());
+        query.setParameter("p_param_value", request.getParamValue());
+        query.setParameter("p_status", request.getStatus());
+        query.setParameter("p_is_active", request.getIsActive());
+        query.setParameter("p_page", request.getPage() + 1);
+        query.setParameter("p_size", request.getSize());
+        query.setParameter("p_sort_by", request.getSortBy());
+        query.setParameter("p_sort_order", request.getSortOrder());
+
+        long total = (long) query.getOutputParameterValue("p_total_rows");
+        List<GroupCategoryEntity> data = query.getResultList();
+        return new PageImpl<>(data, PageRequest.of(request.getPage(), request.getSize()), total);
+    }
+
     // Update dữ liệu tham số
     @Transactional
     public void update(GroupCategoryUpdateRequest request) {

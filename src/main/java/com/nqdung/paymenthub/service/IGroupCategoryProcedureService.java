@@ -17,4 +17,6 @@ public interface IGroupCategoryProcedureService {
     GroupCategoryDTO findById(Long id); // Tìm theo id
     void delete(Long id); // Xóa dữ liệu
     Page<GroupCategoryEntity> getAllWithPaging(int page, int size, String sortBy, String sortOrder); // Lấy tất cả dữ liệu với paging
+    Page<GroupCategoryEntity> searchDynamic1(GroupCategorySearchRequest request); // Search dynamic
+    Page<GroupCategoryEntity> searchDynamic4(GroupCategorySearchRequest request);
 }

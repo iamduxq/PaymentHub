@@ -68,4 +68,14 @@ public class GroupCategoryProcedureService implements IGroupCategoryProcedureSer
     public Page<GroupCategoryEntity> getAllWithPaging(int page, int size, String sortBy, String sortOrder) {
         return procedure.getAllWithPaging(page, size, sortBy, sortOrder);
     }
+
+    @Override
+    public Page<GroupCategoryEntity> searchDynamic1(GroupCategorySearchRequest request) {
+        return procedure.searchDynamic1(request);
+    }
+
+    @Override
+    public Page<GroupCategoryEntity> searchDynamic4(GroupCategorySearchRequest request) {
+        return procedure.searchDynamic4(request);
+    }
 }

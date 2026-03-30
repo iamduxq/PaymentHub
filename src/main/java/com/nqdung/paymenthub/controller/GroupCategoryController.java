@@ -2,18 +2,17 @@ package com.nqdung.paymenthub.controller;
 
 import com.nqdung.paymenthub.dto.GroupCategoryDTO;
 import com.nqdung.paymenthub.dto.request.GroupCategoryCreateRequest;
-import com.nqdung.paymenthub.dto.request.GroupCategoryRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategorySearchRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategoryUpdateRequest;
 import com.nqdung.paymenthub.entity.GroupCategoryEntity;
 import com.nqdung.paymenthub.mapper.GroupCategoryMapper;
 import com.nqdung.paymenthub.paging.PageMapper;
 import com.nqdung.paymenthub.paging.PageResponse;
+import com.nqdung.paymenthub.response.ActionResponse;
 import com.nqdung.paymenthub.service.IGroupCategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -62,33 +61,37 @@ public class GroupCategoryController {
 
     // Sửa danh mục theo id
     @PutMapping("/{id}")
-    public ResponseEntity<GroupCategoryDTO> editParam(@PathVariable Long id, @RequestBody GroupCategoryUpdateRequest newParam) {
-        return ResponseEntity.ok().body(groupCategoryService.editParam(id, newParam));
+    public ResponseEntity<ActionResponse<GroupCategoryDTO>> editParam(
+            @PathVariable Long id,
+            @RequestBody GroupCategoryUpdateRequest newParam,
+            @RequestParam(defaultValue = "true") boolean isSendApprove
+    ) {
+        return ResponseEntity.ok(groupCategoryService.editParam(id, newParam, isSendApprove));
     }
 
     // Xóa danh mục theo id
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         groupCategoryService.delete(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(Map.of("message", "Xóa tham số cấu hình thành công"));
     }
 
     // Gửi duyệt
-    @PostMapping("/{id}/send-approve")
-    public ResponseEntity<?> sendToApprove(@PathVariable Long id,@Validated @RequestBody GroupCategoryRequest request) {
-        groupCategoryService.sendToApprove(id, request);
+    @PostMapping("/send-approve/{id}")
+    public ResponseEntity<?> sendToApprove(@PathVariable Long id) {
+        groupCategoryService.sendToApprove(id);
         return ResponseEntity.ok(Map.of("message", "Gửi duyệt thành công!"));
     }
 
     // Duyệt
-    @PostMapping("/{id}/approve")
+    @PostMapping("/approve/{id}")
     public ResponseEntity<?> approve(@PathVariable Long id) {
         groupCategoryService.approve(id);
         return ResponseEntity.ok(Map.of("message", "Phê duyệt thành công!"));
     }
 
     // Hủy duyệt
-    @PostMapping("/{id}/cancel-approve")
+    @PostMapping("/cancel-approve/{id}")
     public ResponseEntity<?> cancelApprove(@PathVariable Long id) {
         groupCategoryService.cancelApprove(id);
         return ResponseEntity.ok(Map.of("message", "Hủy duyệt thành công!"));
