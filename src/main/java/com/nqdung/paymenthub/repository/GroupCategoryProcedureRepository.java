@@ -17,32 +17,33 @@ import java.util.Date;
 import java.util.List;
 
 @Repository
-@RequiredArgsConstructor
 public class GroupCategoryProcedureRepository {
     @PersistenceContext
     private EntityManager entityManager;
 
     // Thêm danh mục
     @Transactional
-    public Long insertCategory(GroupCategoryCreateRequest request) {
+    public Long insertCategory(GroupCategoryCreateRequest request, boolean isSendApprove) {
         StoredProcedureQuery query = entityManager.createStoredProcedureQuery("NQD_PRC_GROUPCATEGORY_INSERT");
-        query.registerStoredProcedureParameter("P_PARAM_TYPE", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("P_PARAM_VALUE", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("P_PARAM_NAME", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("P_COMPONENT_CODE", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("P_EFFECTIVE_DATE", Date.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("P_END_EFFECTIVE_DATE", Date.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("P_DESCRIPTION", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("P_ID", Long.class, ParameterMode.OUT);
-        query.setParameter("P_PARAM_TYPE", request.getParamType());
-        query.setParameter("P_PARAM_VALUE", request.getParamValue());
-        query.setParameter("P_PARAM_NAME", request.getParamName());
-        query.setParameter("P_COMPONENT_CODE", request.getComponentCode());
-        query.setParameter("P_EFFECTIVE_DATE", request.getEffectiveDate());
-        query.setParameter("P_END_EFFECTIVE_DATE", request.getEndEffectiveDate());
-        query.setParameter("P_DESCRIPTION", request.getDescription());
+        query.registerStoredProcedureParameter("D_PARAM_TYPE", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_PARAM_VALUE", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_PARAM_NAME", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_COMPONENT_CODE", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_EFFECTIVE_DATE", Date.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_END_EFFECTIVE_DATE", Date.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_DESCRIPTION", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_IS_SEND_APPROVE", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_ID", Long.class, ParameterMode.OUT);
+        query.setParameter("D_PARAM_TYPE", request.getParamType());
+        query.setParameter("D_PARAM_VALUE", request.getParamValue());
+        query.setParameter("D_PARAM_NAME", request.getParamName());
+        query.setParameter("D_COMPONENT_CODE", request.getComponentCode());
+        query.setParameter("D_EFFECTIVE_DATE", request.getEffectiveDate());
+        query.setParameter("D_END_EFFECTIVE_DATE", request.getEndEffectiveDate());
+        query.setParameter("D_DESCRIPTION", request.getDescription());
+        query.setParameter("D_IS_SEND_APPROVE", isSendApprove ? 1 : 0);
         query.execute();
-        return ((Number) query.getOutputParameterValue("P_ID")).longValue();
+        return ((Number) query.getOutputParameterValue("D_ID")).longValue();
     }
 
     // Lấy dữ liệu bảng
@@ -73,29 +74,10 @@ public class GroupCategoryProcedureRepository {
         return new PageImpl<>(result, pageable, total);
     }
 
-    // Tìm kiếm theo tiêu chí
-    @SuppressWarnings("unchecked")
-    public List<GroupCategoryEntity> search(GroupCategorySearchRequest request) {
-        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("NQD_PRC_GROUPCATEGORY_SEARCH", GroupCategoryEntity.class);
-        query.registerStoredProcedureParameter("D_PARAM_TYPE", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("D_PARAM_VALUE", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("D_PARAM_NAME", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("D_IS_ACTIVE", Integer.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("D_STATUS", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("P_RESULT", void.class, ParameterMode.REF_CURSOR);
-        query.setParameter("D_PARAM_TYPE", request.getParamType());
-        query.setParameter("D_PARAM_VALUE", request.getParamValue());
-        query.setParameter("D_PARAM_NAME", request.getParamName());
-        query.setParameter("D_IS_ACTIVE", request.getIsActive());
-        query.setParameter("D_STATUS", request.getStatus());
-        query.execute();
-        return query.getResultList();
-    }
-
     // Dynamic search
     @SuppressWarnings("unchecked")
-    public Page<GroupCategoryEntity> searchDynamic1(GroupCategorySearchRequest request) {
-        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("NQD_PRC_GROUP_CATEGORY_SEARCH_PAGING2", GroupCategoryEntity.class);
+    public Page<GroupCategoryEntity> searchDynamic(GroupCategorySearchRequest request) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("NQD_PRC_GROUP_CATEGORY_SEARCH_PAGING", GroupCategoryEntity.class);
         query.registerStoredProcedureParameter("P_PARAM_NAME", String.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("P_PARAM_TYPE", String.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("P_PARAM_VALUE", String.class, ParameterMode.IN);
@@ -124,56 +106,30 @@ public class GroupCategoryProcedureRepository {
         return new PageImpl<>(data, PageRequest.of(request.getPage(), request.getSize()), total);
     }
 
-    @SuppressWarnings("unchecked")
-    public Page<GroupCategoryEntity> searchDynamic4(GroupCategorySearchRequest request) {
-        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("NQD_PRC_GROUP_CATEGORY_SEARCH_PAGING_DBMS_SQL", GroupCategoryEntity.class);
-        query.registerStoredProcedureParameter("p_param_name", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_param_type", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_param_value", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_status", Integer.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_is_active", Integer.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_page", Integer.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_size", Integer.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_sort_by", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_sort_order", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_total_rows", Long.class, ParameterMode.OUT);
-        query.registerStoredProcedureParameter("p_cursor", void.class, ParameterMode.REF_CURSOR);
-
-        query.setParameter("p_param_name", request.getParamName());
-        query.setParameter("p_param_type", request.getParamType());
-        query.setParameter("p_param_value", request.getParamValue());
-        query.setParameter("p_status", request.getStatus());
-        query.setParameter("p_is_active", request.getIsActive());
-        query.setParameter("p_page", request.getPage() + 1);
-        query.setParameter("p_size", request.getSize());
-        query.setParameter("p_sort_by", request.getSortBy());
-        query.setParameter("p_sort_order", request.getSortOrder());
-
-        long total = (long) query.getOutputParameterValue("p_total_rows");
-        List<GroupCategoryEntity> data = query.getResultList();
-        return new PageImpl<>(data, PageRequest.of(request.getPage(), request.getSize()), total);
-    }
-
     // Update dữ liệu tham số
     @Transactional
-    public void update(GroupCategoryUpdateRequest request) {
+    public void update(GroupCategoryUpdateRequest request, boolean isSendApprove) {
         StoredProcedureQuery query = entityManager.createStoredProcedureQuery("NQD_PRC_GROUP_CATEGORY_UPDATE");
+        query.registerStoredProcedureParameter("D_ID", Long.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_PARAM_TYPE", String.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("D_PARAM_VALUE", String.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("D_PARAM_NAME", String.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("D_COMPONENT_CODE", String.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("D_EFFECTIVE_DATE", Date.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("D_END_EFFECTIVE_DATE", Date.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("D_DESCRIPTION", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("D_ID", Long.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_IS_SEND_APPROVE", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_RESULT", Integer.class, ParameterMode.OUT);
+        query.setParameter("D_ID", request.getId());
+        query.setParameter("D_PARAM_TYPE", request.getParamType());
         query.setParameter("D_PARAM_VALUE", request.getParamValue());
         query.setParameter("D_PARAM_NAME", request.getParamName());
         query.setParameter("D_COMPONENT_CODE", request.getComponentCode());
         query.setParameter("D_EFFECTIVE_DATE", request.getEffectiveDate());
         query.setParameter("D_END_EFFECTIVE_DATE", request.getEndEffectiveDate());
         query.setParameter("D_DESCRIPTION", request.getDescription());
-        query.setParameter("D_ID", request.getId());
+        query.setParameter("D_IS_SEND_APPROVE", isSendApprove ? 1 : 0);
         query.execute();
-        entityManager.clear();
     }
 
     // Tìm kiếm theo Id
@@ -197,4 +153,23 @@ public class GroupCategoryProcedureRepository {
         query.execute();
     }
 
+    // Hủy phê duyệt
+    @Transactional
+    public void cancel(Long id) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("NQD_GROUP_CATEGORY_CANCEL_APPROVE");
+        query.registerStoredProcedureParameter("D_ID", Long.class, ParameterMode.IN);
+        query.setParameter("D_ID", id);
+        query.execute();
+    }
+
+    // Từ chối phê duyệt
+    @Transactional
+    public void reject(Long id, String reason) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("NQD_PRC_GROUP_CATEGORY_REJECT");
+        query.registerStoredProcedureParameter("D_ID", Long.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("D_REASON", String.class, ParameterMode.IN);
+        query.setParameter("D_ID", id);
+        query.setParameter("D_REASON", reason);
+        query.execute();
+    }
 }

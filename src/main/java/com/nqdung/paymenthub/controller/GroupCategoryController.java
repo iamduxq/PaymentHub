@@ -29,9 +29,12 @@ public class GroupCategoryController {
 
     // JPA Query
     // Thêm danh mục tham số
-    @PostMapping
-    public ResponseEntity<?> addParamType(@RequestBody GroupCategoryCreateRequest groupCategory) {
-        return ResponseEntity.ok(groupCategoryService.addParamType(groupCategory));
+    @PostMapping("/add-param")
+    public ResponseEntity<?> addParamType(
+            @RequestBody GroupCategoryCreateRequest groupCategory,
+            @RequestParam(defaultValue = "false") boolean isSendApprove
+    ) {
+        return ResponseEntity.ok(groupCategoryService.addParamType(groupCategory, isSendApprove));
     }
 
     // Lấy tất cả danh mục
@@ -95,5 +98,18 @@ public class GroupCategoryController {
     public ResponseEntity<?> cancelApprove(@PathVariable Long id) {
         groupCategoryService.cancelApprove(id);
         return ResponseEntity.ok(Map.of("message", "Hủy duyệt thành công!"));
+    }
+
+    // Từ chối phê duyệt
+    @PostMapping("/reject-approve/{id}")
+    public ResponseEntity<?> rejectApprove(
+            @PathVariable Long id,
+            @RequestBody String reason
+    ) {
+        if (reason == null || reason.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Lý do từ chối không được để trống."));
+        }
+        groupCategoryService.reject(id, reason);
+        return ResponseEntity.ok(Map.of("message", "Từ chối phê duyệt thành công."));
     }
 }

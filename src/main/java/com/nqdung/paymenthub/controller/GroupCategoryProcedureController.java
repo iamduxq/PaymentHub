@@ -4,7 +4,6 @@ import com.nqdung.paymenthub.dto.GroupCategoryDTO;
 import com.nqdung.paymenthub.dto.request.GroupCategoryCreateRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategorySearchRequest;
 import com.nqdung.paymenthub.dto.request.GroupCategoryUpdateRequest;
-import com.nqdung.paymenthub.entity.GroupCategoryEntity;
 import com.nqdung.paymenthub.mapper.GroupCategoryMapper;
 import com.nqdung.paymenthub.paging.PageMapper;
 import com.nqdung.paymenthub.paging.PageResponseProcedure;
@@ -28,47 +27,45 @@ public class GroupCategoryProcedureController {
         return mapper.toDTOList(service.findAll());
     }
 
-//    @GetMapping("/get-all")
-//    public PageResponseProcedure<GroupCategoryDTO> getAllWithPaging(
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "20") int size,
-//            @RequestParam(defaultValue = "EFFECTIVE_DATE") String sortBy,
-//            @RequestParam(defaultValue = "DESC") String sortOrder
-//    ) {
-//        Page<GroupCategoryDTO> result = service.getAllWithPaging(page, size, sortBy, sortOrder).map(mapper::toDTO);
-//        return PageMapper.toResponseProcedure(result, sortBy, sortOrder);
-//    }
+    @GetMapping("/get-all")
+    public PageResponseProcedure<GroupCategoryDTO> getAllWithPaging(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "EFFECTIVE_DATE") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortOrder
+    ) {
+        Page<GroupCategoryDTO> result = service.getAllWithPaging(page, size, sortBy, sortOrder).map(mapper::toDTO);
+        return PageMapper.toResponseProcedure(result, sortBy, sortOrder);
+    }
 
     @PostMapping("/add")
-    public ResponseEntity<?> add(@RequestBody GroupCategoryCreateRequest request) {
-        service.insertCategory(request);
-        return ResponseEntity.ok("Thêm thành công");
+    public ResponseEntity<?> add(
+            @RequestBody GroupCategoryCreateRequest request,
+            @RequestParam(name = "isSendApprove", defaultValue = "false") boolean isSendApprove
+    ) {
+            service.insertCategory(request, isSendApprove);
+            String successMessage = isSendApprove ? "Gửi duyệt thành công" : "Lưu thành công";
+            return ResponseEntity.ok(successMessage);
     }
 
-    @PostMapping("/search")
-    public List<GroupCategoryDTO> search(@RequestBody GroupCategorySearchRequest searchRequest) {
-        return service.findCategoryByParam(searchRequest);
-    }
-
-    @GetMapping("/search-dynamic1")
+    @GetMapping("/search")
     public PageResponseProcedure<GroupCategoryDTO> searchDynamic(
             GroupCategorySearchRequest request
             ) {
-        Page<GroupCategoryDTO> result = service.searchDynamic1(request).map(mapper::toDTO);
+        Page<GroupCategoryDTO> result = service.searchDynamic(request).map(mapper::toDTO);
         return PageMapper.toResponseProcedure(result, request);
     }
 
-    @GetMapping("/search-dynamic4")
-    public PageResponseProcedure<GroupCategoryDTO> searchDynamic4(
-            GroupCategorySearchRequest request
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> update(
+            @PathVariable Long id,
+            @RequestBody GroupCategoryUpdateRequest request,
+            @RequestParam(defaultValue = "false") boolean isSendApprove
     ) {
-        Page<GroupCategoryDTO> rs = service.searchDynamic4(request).map(mapper::toDTO);
-        return PageMapper.toResponseProcedure(rs, request);
-    }
-
-    @PutMapping("/update")
-    public GroupCategoryDTO update(@RequestBody GroupCategoryUpdateRequest request) {
-        return service.update(request);
+            request.setId(id);
+            service.update(id, request, isSendApprove);
+            String message = isSendApprove ? "Cập nhật và gửi duyệt thành công!" : "Lưu thay đổi thành công!";
+            return ResponseEntity.ok(message);
     }
 
     @GetMapping("/{id}")
@@ -77,7 +74,23 @@ public class GroupCategoryProcedureController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<?> delete(@PathVariable Long id) {
         service.delete(id);
+        return ResponseEntity.ok("Xóa tham số cấu hình thành công");
+    }
+
+    @PostMapping("/cancel-approve/{id}")
+    public ResponseEntity<?> cancel(@PathVariable Long id) {
+        service.cancel(id);
+        return ResponseEntity.ok("Hủy phê duyệt thành công");
+    }
+
+    @PostMapping("/reject/{id}")
+    public ResponseEntity<?> reject(
+            @PathVariable Long id,
+            @RequestParam(required = false, defaultValue = "Nội dung không phù hợp") String reason
+    ) {
+        service.reject(id, reason);
+        return ResponseEntity.ok("Đã từ chối phê duyệt tham số cấu hình");
     }
 }

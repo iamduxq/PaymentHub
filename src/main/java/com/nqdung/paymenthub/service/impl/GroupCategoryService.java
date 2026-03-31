@@ -36,10 +36,10 @@ public class GroupCategoryService implements IGroupCategoryService {
 
     // Thêm tham số danh mục theo nhóm
     @Override
-    public GroupCategoryDTO addParamType(GroupCategoryCreateRequest dto) {
+    @Transactional
+    public GroupCategoryDTO addParamType(GroupCategoryCreateRequest dto, boolean isSendApprove) {
+        validateDuplicateAdd(dto);
         GroupCategoryEntity entity = new GroupCategoryEntity();
-
-        setNewData(entity, dto);
         entity.setParamType(dto.getParamType());
         entity.setParamValue(dto.getParamValue());
         entity.setParamName(dto.getParamName());
@@ -47,10 +47,15 @@ public class GroupCategoryService implements IGroupCategoryService {
         entity.setEffectiveDate(dto.getEffectiveDate());
         entity.setEndEffectiveDate(dto.getEndEffectiveDate());
         entity.setDescription(dto.getDescription());
-        entity.setStatus(CategoryConstants.STATUS_NEW);
-        entity.setIsActive(1);
+        entity.setIsActive(0);
         entity.setIsDisplay(CategoryConstants.DISPLAY_ALLOW_DELETE);
+        entity.setNewData("{}");
 
+        if (isSendApprove) {
+            entity.setStatus(CategoryConstants.STATUS_PENDING);
+        } else {
+            entity.setStatus(CategoryConstants.STATUS_NEW);
+        }
         entity = categoryRepository.save(entity);
         return categoryGroupMapper.toDTO(entity);
     }
@@ -112,8 +117,8 @@ public class GroupCategoryService implements IGroupCategoryService {
 
 
     // Xóa dữ liệu
-    @Transactional
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void delete(Long id) {
         GroupCategoryEntity category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy dữ liệu"));
@@ -165,15 +170,13 @@ public class GroupCategoryService implements IGroupCategoryService {
         // Kiểm tra xác thực phê duyệt (1,5,7)
         validateSendApprove(entity);
 
-        // Check newData
-        if (entity.getNewData() == null || entity.getNewData().equals("{}")) {
-            throw new RuntimeException("Không tìm thấy dữ liệu đã lưu để gửi phê duyệt");
+        if (entity.getNewData() != null && entity.getNewData().equals("{}")) {
+            // setNewData từ objectMapper
+            GroupCategoryRequest currentNewData = readNewData(entity, GroupCategoryRequest.class);
+            validateDuplicate(currentNewData, id);
+        } else {
+            validateDuplicate(entity, id);
         }
-
-        // setNewData từ objectMapper
-        GroupCategoryRequest currentNewData = readNewData(entity, GroupCategoryRequest.class);
-        validateDuplicate(currentNewData, id);
-
         entity.setStatus(CategoryConstants.STATUS_PENDING);
         categoryRepository.save(entity);
     }
@@ -182,7 +185,7 @@ public class GroupCategoryService implements IGroupCategoryService {
     @Override
     public void approve(Long id) {
         GroupCategoryEntity entity = findCategory(id);
-
+        System.out.println("ID Phê duyệt: " + id);
         // Kiểm tra xác thực chờ duyệt
         validatePending(entity);
 
@@ -191,11 +194,13 @@ public class GroupCategoryService implements IGroupCategoryService {
             throw new RuntimeException("Không tìm thấy newData để phê duyệt");
         }
 
-        // Đọc dữ liệu từ NewData
-        GroupCategoryRequest newData = readNewData(entity, GroupCategoryRequest.class);
+        if (newDataJson != null && !newDataJson.equals("{}")) {
+            // Đọc dữ liệu từ NewData
+            GroupCategoryRequest newData = readNewData(entity, GroupCategoryRequest.class);
+            applyApprovedData(entity, newData);
+        }
 
-        // Setter NEW_DATA
-        applyApprovedData(entity, newData);
+        entity.setIsActive(1);
         entity.setStatus(CategoryConstants.STATUS_APPROVED);
         entity.setIsDisplay(CategoryConstants.DISPLAY_NO_DELETE);
         categoryRepository.save(entity);
@@ -211,6 +216,23 @@ public class GroupCategoryService implements IGroupCategoryService {
         }
 
         entity.setStatus(CategoryConstants.STATUS_CANCELLED);
+        entity.setIsActive(0);
+        entity.setIsDisplay(CategoryConstants.DISPLAY_ALLOW_DELETE);
+        categoryRepository.save(entity);
+    }
+
+    @Override
+    public void reject(Long id, String reason) {
+        GroupCategoryEntity entity = findCategory(id);
+
+        if (entity.getStatus() != 3) {
+            throw new RuntimeException("Tham số cấu hình không ở trạng thái phê duyệt");
+        }
+
+        entity.setStatus(CategoryConstants.STATUS_REJECTED);
+        String currentDes = entity.getDescription() != null ? entity.getDescription() : "";
+        String newDesc = currentDes + " [LÝ DO TỪ CHỐI: " + reason + "]";
+        entity.setDescription(newDesc);
         categoryRepository.save(entity);
     }
 
@@ -262,6 +284,7 @@ public class GroupCategoryService implements IGroupCategoryService {
     }
 
     // Kiểm tra tồn tại
+    // Check cho entity (Add)
     private void validateDuplicate(GroupCategoryEntity req, Long id) {
         boolean checkDuplicate = categoryRepository.existsByParamNameAndParamTypeAndParamValueAndIdNot(
                 req.getParamName(),
@@ -272,6 +295,7 @@ public class GroupCategoryService implements IGroupCategoryService {
     }
 
     // Kiểm tra tồn tại
+    // Check cho request (Update)
     private void validateDuplicate(GroupCategoryRequest req, Long id) {
         boolean checkDuplicate = categoryRepository.existsByParamNameAndParamTypeAndParamValueAndIdNot(
                 req.getParamName(),
@@ -279,6 +303,16 @@ public class GroupCategoryService implements IGroupCategoryService {
                 req.getParamValue(),
                 id);
         if (checkDuplicate) throw new IllegalArgumentException("Tham số cấu hình đã tôn tại");
+    }
+
+    // Validate cho addParam
+    private void validateDuplicateAdd(GroupCategoryCreateRequest req) {
+        boolean checkDuplicate = categoryRepository.existsByParamNameAndParamTypeAndParamValue(
+                req.getParamName(), req.getParamType(), req.getParamValue()
+        );
+        if (checkDuplicate) {
+            throw new IllegalArgumentException("Tham số cấu hình đã tồn tại");
+        }
     }
 
     // Setter NEW_DATA

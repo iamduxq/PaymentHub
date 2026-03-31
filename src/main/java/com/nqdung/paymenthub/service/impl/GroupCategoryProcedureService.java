@@ -11,6 +11,7 @@ import com.nqdung.paymenthub.service.IGroupCategoryProcedureService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,8 +22,9 @@ public class GroupCategoryProcedureService implements IGroupCategoryProcedureSer
     private final GroupCategoryMapper mapper;
 
     @Override
-    public Long insertCategory(GroupCategoryCreateRequest request) {
-        return procedure.insertCategory(request);
+    @Transactional
+    public Long insertCategory(GroupCategoryCreateRequest request, boolean isSendApprove) {
+        return procedure.insertCategory(request, isSendApprove);
     }
 
     @Override
@@ -31,20 +33,11 @@ public class GroupCategoryProcedureService implements IGroupCategoryProcedureSer
     }
 
     @Override
-    public List<GroupCategoryDTO> findCategoryByParam(GroupCategorySearchRequest searchRequest) {
-        return mapper.toDTOList(procedure.search(searchRequest));
-    }
-
-    @Override
-    public GroupCategoryDTO update(GroupCategoryUpdateRequest request) {
+    @Transactional
+    public void update(Long id, GroupCategoryUpdateRequest request, boolean isSendApprove) {
+        request.setId(id);
         System.out.println("Update ID: " + request.getId());
-        procedure.update(request);
-        GroupCategoryEntity update = procedure.findById(request.getId());
-        System.out.println("After update: " + update);
-        if (update == null) {
-            throw new RuntimeException("Dữ liệu không tồn tại");
-        }
-        return mapper.toDTO(update);
+        procedure.update(request, isSendApprove);
     }
 
     @Override
@@ -57,10 +50,13 @@ public class GroupCategoryProcedureService implements IGroupCategoryProcedureSer
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         GroupCategoryEntity entity = procedure.findById(id);
         if (entity != null) {
             procedure.delete(entity.getId());
+        } else {
+            throw new RuntimeException("Không tìm thấy dữ liệu để xóa!");
         }
     }
 
@@ -70,12 +66,27 @@ public class GroupCategoryProcedureService implements IGroupCategoryProcedureSer
     }
 
     @Override
-    public Page<GroupCategoryEntity> searchDynamic1(GroupCategorySearchRequest request) {
-        return procedure.searchDynamic1(request);
+    public Page<GroupCategoryEntity> searchDynamic(GroupCategorySearchRequest request) {
+        return procedure.searchDynamic(request);
     }
 
     @Override
-    public Page<GroupCategoryEntity> searchDynamic4(GroupCategorySearchRequest request) {
-        return procedure.searchDynamic4(request);
+    public void cancel(Long id) {
+        GroupCategoryEntity entity = procedure.findById(id);
+        if (entity == null) {
+            throw new RuntimeException("Không tìm thấy tham số cấu hình");
+        }
+        procedure.cancel(id);
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void reject(Long id, String reason) {
+        GroupCategoryEntity entity = procedure.findById(id);
+        if (entity == null) {
+            throw new RuntimeException("Không tìm thấy tham số cấu hình");
+        }
+        procedure.reject(id, reason);
+    }
+
 }

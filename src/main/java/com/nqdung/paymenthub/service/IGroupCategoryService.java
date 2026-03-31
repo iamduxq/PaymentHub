@@ -12,7 +12,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface IGroupCategoryService {
-    GroupCategoryDTO addParamType(GroupCategoryCreateRequest groupCategoryDTO);
+    GroupCategoryDTO addParamType(GroupCategoryCreateRequest groupCategoryDTO, boolean isSendApprove);
     Page<GroupCategoryEntity> getAllWithPaging(int page, int size, String sortBy, String sortOrder);
     GroupCategoryEntity findById(Long id);
     ActionResponse<GroupCategoryDTO> editParam(Long id, GroupCategoryUpdateRequest newParam, boolean isSendApprove);
@@ -22,4 +22,5 @@ public interface IGroupCategoryService {
     void sendToApprove(Long id);
     void approve(Long id);
     void cancelApprove(Long id);
+    void reject(Long id, String reason);
 }

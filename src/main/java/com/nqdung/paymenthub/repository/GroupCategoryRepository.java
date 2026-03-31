@@ -12,4 +12,6 @@ import java.util.List;
 public interface GroupCategoryRepository extends JpaRepository<GroupCategoryEntity, Long>, JpaSpecificationExecutor<GroupCategoryEntity> {
     // Kiểm tra tồn tại tham số (loại trừ ID hiện tại nếu đang sửa)
     boolean existsByParamNameAndParamTypeAndParamValueAndIdNot(String paramName, String paramType, String paramValue, Long id);
+
+    boolean existsByParamNameAndParamTypeAndParamValue(String paramName, String paramType, String paramValue);
 }
